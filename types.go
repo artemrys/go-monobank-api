@@ -1,4 +1,4 @@
-package gomonobank
+package gomono
 
 // CurrencyInfo describes the one-pair currency information.
 type CurrencyInfo struct {

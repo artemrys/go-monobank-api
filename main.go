@@ -1,4 +1,4 @@
-package gomonobank
+package gomono
 
 import (
 	"encoding/json"
