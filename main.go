@@ -11,7 +11,7 @@ func makeRequest(req *http.Request) (result []byte, err error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Error occured: ", err)
+		fmt.Println("Error occurred: ", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
