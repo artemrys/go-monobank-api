@@ -1,6 +1,7 @@
 # Golang bindings for the Monobank API
 
 [![GoDoc](https://godoc.org/github.com/artemrys/go-monobank-api?status.svg)](https://godoc.org/github.com/artemrys/go-monobank-api)
+[![Go Report Card](https://goreportcard.com/badge/github.com/artemrys/go-monobank-api)](https://goreportcard.com/report/github.com/artemrys/go-monobank-api)
 [![Travis](https://travis-ci.org/artemrys/go-monobank-api.svg?branch=master)](https://travis-ci.org/artemrys/go-monobank-api)
 
 All methods are fairly self explanatory, and reading the godoc page should
