@@ -10,6 +10,9 @@ type CurrencyInfo struct {
 	RateCross     float64 `json:"rateCross"`
 }
 
+// CurrencyInfos describes list of currency info.
+type CurrencyInfos []CurrencyInfo
+
 // UserAccount describes the client's account.
 type UserAccount struct {
 	ID           string `json:"id"`
@@ -19,10 +22,13 @@ type UserAccount struct {
 	CashbackType string `json:"cashbackType"` // TODO: make it enum
 }
 
+// UserAccounts describes list of user accounts.
+type UserAccounts []UserAccount
+
 // UserInfo describes the client.
 type UserInfo struct {
-	Name     string        `json:"name"`
-	Accounts []UserAccount `json:"accounts"`
+	Name     string       `json:"name"`
+	Accounts UserAccounts `json:"accounts"`
 }
 
 // StatementItem describes the transaction in the particular point in time.
@@ -39,3 +45,6 @@ type StatementItem struct {
 	CashbackAmount  int64  `json:"cashbackAmount"`
 	Balance         int64  `json:"balance"`
 }
+
+// StatementItems describes list of statement items.
+type StatementItems []StatementItem
