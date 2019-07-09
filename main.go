@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 func makeRequest(req *http.Request) (result []byte, err error) {
@@ -44,6 +46,13 @@ func GetClientInfo(token string) (result UserInfo, err error) {
 	}
 	err = json.Unmarshal(resp, &result)
 	return
+}
+
+// GetPersonalStatementsTillNow returns all transaction by the given account in the particular period of time.
+// It uses GetPersonalStatements but defines `to` param as now time.
+func GetPersonalStatementsTillNow(token, account, from string) (result StatementItems, err error) {
+	to := time.Now().Unix()
+	return GetPersonalStatements(token, account, from, strconv.FormatInt(to, 10))
 }
 
 // GetPersonalStatements returns all transaction by the given account in the particular period of time.
