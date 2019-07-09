@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+const (
+	baseMonobankAPIUrl = "https://api.monobank.ua"
+)
+
 func makeRequest(req *http.Request) (result []byte, err error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -27,7 +31,8 @@ func makeRequest(req *http.Request) (result []byte, err error) {
 
 // GetBankCurrency returns all available currency infos.
 func GetBankCurrency() (result CurrencyInfos, err error) {
-	req, _ := http.NewRequest("GET", "https://api.monobank.ua/bank/currency", nil)
+	url := fmt.Sprintf("%s/bank/currency", baseMonobankAPIUrl)
+	req, _ := http.NewRequest("GET", url, nil)
 	resp, err := makeRequest(req)
 	if err != nil {
 		fmt.Println("Error while doing a request: ", err)
@@ -38,7 +43,8 @@ func GetBankCurrency() (result CurrencyInfos, err error) {
 
 // GetClientInfo returns all available info about the client.
 func GetClientInfo(token string) (result UserInfo, err error) {
-	req, _ := http.NewRequest("GET", "https://api.monobank.ua/personal/client-info", nil)
+	url := fmt.Sprintf("%s/personal/client-info", baseMonobankAPIUrl)
+	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("X-Token", token)
 	resp, err := makeRequest(req)
 	if err != nil {
@@ -57,7 +63,7 @@ func GetPersonalStatementsTillNow(token, account, from string) (result Statement
 
 // GetPersonalStatements returns all transaction by the given account in the particular period of time.
 func GetPersonalStatements(token, account, from, to string) (result StatementItems, err error) {
-	url := fmt.Sprintf("https://api.monobank.ua/personal/statement/%s/%s/%s", account, from, to)
+	url := fmt.Sprintf("%s/personal/statement/%s/%s/%s", baseMonobankAPIUrl, account, from, to)
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("X-Token", token)
 	resp, err := makeRequest(req)
