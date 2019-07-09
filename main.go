@@ -36,6 +36,7 @@ func GetBankCurrency() (result CurrencyInfos, err error) {
 	resp, err := makeRequest(req)
 	if err != nil {
 		fmt.Println("Error while doing a request: ", err)
+		return nil, err
 	}
 	err = json.Unmarshal(resp, &result)
 	return
@@ -49,6 +50,7 @@ func GetClientInfo(token string) (result UserInfo, err error) {
 	resp, err := makeRequest(req)
 	if err != nil {
 		fmt.Println("Error while doing a request: ", err)
+		return nil, err
 	}
 	err = json.Unmarshal(resp, &result)
 	return
@@ -69,6 +71,7 @@ func GetPersonalStatements(token, account, from, to string) (result StatementIte
 	resp, err := makeRequest(req)
 	if err != nil {
 		fmt.Println("Error while doing a request: ", err)
+		return nil, err
 	}
 	err = json.Unmarshal(resp, &result)
 	return
