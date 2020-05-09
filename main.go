@@ -7,74 +7,88 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/golang/glog"
 )
 
 const (
 	baseMonobankAPIUrl = "https://api.monobank.ua"
 )
 
-func makeRequest(req *http.Request) (result []byte, err error) {
-	client := &http.Client{}
+func makeRequest(req *http.Request) ([]byte, error) {
+	client := new(http.Client)
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Error occurred: ", err)
+		glog.Errorf("Error while making request: %v", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
-	result, err = ioutil.ReadAll(resp.Body)
+	result, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Cannot read body")
+		glog.Errorf("Cannot read response body: %v", err)
 		return nil, err
 	}
-	return
+	return result, nil
 }
 
 // GetBankCurrency returns all available currency infos.
-func GetBankCurrency() (result CurrencyInfos, err error) {
+func GetBankCurrency() (*CurrencyInfos, error) {
 	url := fmt.Sprintf("%s/bank/currency", baseMonobankAPIUrl)
 	req, _ := http.NewRequest("GET", url, nil)
 	resp, err := makeRequest(req)
 	if err != nil {
-		fmt.Println("Error while doing a request: ", err)
 		return nil, err
 	}
+	result := new(CurrencyInfos)
 	err = json.Unmarshal(resp, &result)
-	return
+	if err != nil {
+		glog.Errorf("Unable to unmarshal %v: %v", resp, err)
+		return nil, err
+	}
+	return result, nil
 }
 
 // GetClientInfo returns all available info about the client.
-func GetClientInfo(token string) (result UserInfo, err error) {
+func GetClientInfo(token string) (*UserInfo, error) {
 	url := fmt.Sprintf("%s/personal/client-info", baseMonobankAPIUrl)
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("X-Token", token)
 	resp, err := makeRequest(req)
 	if err != nil {
-		fmt.Println("Error while doing a request: ", err)
 		return nil, err
 	}
+	result := new(UserInfo)
 	err = json.Unmarshal(resp, &result)
-	return
+	if err != nil {
+		glog.Errorf("Unable to unmarshal %v: %v", resp, err)
+		return nil, err
+	}
+	return result, nil
 }
 
 // GetPersonalStatementsTillNow returns all transaction by the given account in the particular period of time.
 // It uses GetPersonalStatements but defines `to` param as now time.
-func GetPersonalStatementsTillNow(token, account, from string) (result StatementItems, err error) {
+func GetPersonalStatementsTillNow(token, account, from string) (*StatementItems, error) {
 	to := time.Now().Unix()
 	return GetPersonalStatements(token, account, from, strconv.FormatInt(to, 10))
 }
 
 // GetPersonalStatements returns all transaction by the given account in the particular period of time.
-func GetPersonalStatements(token, account, from, to string) (result StatementItems, err error) {
+func GetPersonalStatements(token, account, from, to string) (*StatementItems, error) {
 	url := fmt.Sprintf("%s/personal/statement/%s/%s/%s", baseMonobankAPIUrl, account, from, to)
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("X-Token", token)
 	resp, err := makeRequest(req)
 	if err != nil {
-		fmt.Println("Error while doing a request: ", err)
 		return nil, err
 	}
+	result := new(StatementItems)
 	err = json.Unmarshal(resp, &result)
-	return
+	if err != nil {
+		glog.Errorf("Unable to unmarshal %v: %v", resp, err)
+		return nil, err
+	}
+	return result, nil
 }
 
 func main() {
