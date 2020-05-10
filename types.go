@@ -49,3 +49,8 @@ type StatementItem struct {
 
 // StatementItems describes list of statement items.
 type StatementItems []StatementItem
+
+// Error describes an error from Monobank API.
+type Error struct {
+	ErrorDescription string `json:"errorDescription"`
+}

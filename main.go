@@ -28,6 +28,11 @@ func makeRequest(req *http.Request) ([]byte, error) {
 		glog.Errorf("Cannot read response body: %v", err)
 		return nil, err
 	}
+	monobankErr := new(Error)
+	err = json.Unmarshal(result, monobankErr)
+	if err == nil {
+		return nil, fmt.Errorf("while requesting Monobank: %q", monobankErr.ErrorDescription)
+	}
 	return result, nil
 }
 
@@ -40,7 +45,7 @@ func GetBankCurrency() (*CurrencyInfos, error) {
 		return nil, err
 	}
 	result := new(CurrencyInfos)
-	err = json.Unmarshal(resp, &result)
+	err = json.Unmarshal(resp, result)
 	if err != nil {
 		glog.Errorf("Unable to unmarshal %v: %v", resp, err)
 		return nil, err
@@ -58,7 +63,7 @@ func GetClientInfo(token string) (*UserInfo, error) {
 		return nil, err
 	}
 	result := new(UserInfo)
-	err = json.Unmarshal(resp, &result)
+	err = json.Unmarshal(resp, result)
 	if err != nil {
 		glog.Errorf("Unable to unmarshal %v: %v", resp, err)
 		return nil, err
@@ -83,7 +88,7 @@ func GetPersonalStatements(token, account, from, to string) (*StatementItems, er
 		return nil, err
 	}
 	result := new(StatementItems)
-	err = json.Unmarshal(resp, &result)
+	err = json.Unmarshal(resp, result)
 	if err != nil {
 		glog.Errorf("Unable to unmarshal %v: %v", resp, err)
 		return nil, err
