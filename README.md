@@ -15,42 +15,9 @@ all that yourself.
 
 ### Example
 
-First, ensure the library is installed and up to date by running
-`go get -u github.com/artemrys/go-monobank-api`.
-
-```go
-package main
-
-import (
-	"fmt"
-
-	gomono "github.com/artemrys/go-monobank-api"
-)
-
-func main() {
-	bankCurrency, err := gomono.GetBankCurrency()
-	if err != nil {
-		fmt.Println("Error in getting bank currency: ", err)
-	}
-	fmt.Println(bankCurrency)
-
-	token := "<TOKEN>"
-
-	clientInfo, err := gomono.GetClientInfo(token)
-	if err != nil {
-		fmt.Println("Error in getting client info: ", err)
-	}
-	fmt.Println(clientInfo)
-
-	personalStatements, err := gomono.GetPersonalStatements(token, "0", "1559341138", "1562019538")
-	if err != nil {
-		fmt.Println("Error in getting personal statements")
-	}
-	fmt.Println(personalStatements)
-}
-```
+Please take a look at `examples/example.go`.
 
 ### Links
 
- * [Token](https://api.monobank.ua/)
- * [Docs](https://api.monobank.ua/docs/)
+- [Token](https://api.monobank.ua/)
+- [Docs](https://api.monobank.ua/docs/)
