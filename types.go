@@ -27,8 +27,9 @@ type UserAccounts []UserAccount
 
 // UserInfo describes the client.
 type UserInfo struct {
-	Name     string       `json:"name"`
-	Accounts UserAccounts `json:"accounts"`
+	Name       string       `json:"name"`
+	WebHookURL string       `json:"webHookUrl"`
+	Accounts   UserAccounts `json:"accounts"`
 }
 
 // StatementItem describes the transaction in the particular point in time.
