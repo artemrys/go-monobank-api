@@ -90,25 +90,3 @@ func GetPersonalStatements(token, account, from, to string) (*StatementItems, er
 	}
 	return result, nil
 }
-
-func main() {
-	bankCurrency, err := GetBankCurrency()
-	if err != nil {
-		fmt.Println("Error in getting bank currency: ", err)
-	}
-	fmt.Println(bankCurrency)
-
-	token := "SPECIFY_YOUR_TOKEN"
-
-	clientInfo, err := GetClientInfo(token)
-	if err != nil {
-		fmt.Println("Error in getting client info: ", err)
-	}
-	fmt.Println(clientInfo)
-
-	personalStatements, err := GetPersonalStatements(token, "0", "1559341138", "1562019538")
-	if err != nil {
-		fmt.Println("Error in getting personal statements")
-	}
-	fmt.Println(personalStatements)
-}
