@@ -10,24 +10,30 @@ import (
 var token = flag.String("token", "", "Token to access Monobank data")
 
 func main() {
+	flag.Parse()
+	if *token == "" {
+		fmt.Println("No token specified!")
+		return
+	}
+
 	bankCurrency, err := gomono.GetBankCurrency()
 	if err != nil {
-		fmt.Println("Error in getting bank currency: ", err)
+		fmt.Printf("Error in getting bank currency: %v\n", err)
 	} else {
-		fmt.Println(bankCurrency)
+		fmt.Printf("bankCurrency: %+v\n", bankCurrency)
 	}
 
 	clientInfo, err := gomono.GetClientInfo(*token)
 	if err != nil {
-		fmt.Println("Error in getting client info: ", err)
+		fmt.Printf("Error in getting client info: %v\n", err)
 	} else {
-		fmt.Println(clientInfo)
+		fmt.Printf("clientInfo: %+v\n", clientInfo)
 	}
 
-	personalStatements, err := gomono.GetPersonalStatements(*token, "0", "1559341138", "1562019538")
+	personalStatements, err := gomono.GetPersonalStatements(*token, "0", "1588982400", "1589070805")
 	if err != nil {
-		fmt.Println("Error in getting personal statements: ", err)
+		fmt.Printf("Error in getting personal statements: %v\n", err)
 	} else {
-		fmt.Println(personalStatements)
+		fmt.Printf("personalStatements: %+v\n", personalStatements)
 	}
 }
