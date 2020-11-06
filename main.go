@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/golang/glog"
+	"golang.org/x/time/rate"
 )
 
 const (
@@ -20,12 +21,24 @@ const (
 type MonobankClient struct {
 	// Token is monobank access token.
 	Token string
+	// getBankCurrencyLimiter limits calls to GetBankCurrency.
+	getBankCurrencyLimiter *rate.Limiter
+	// getClientInfoLimiter limits calls to GetClientInfo.
+	getClientInfoLimiter *rate.Limiter
+	// getPersonalStatementsLimiter limits calls to GetPersonalStatements.
+	getPersonalStatementsLimiter *rate.Limiter
 }
 
 // NewMonobankClient returns new MonobankClient.
 func NewMonobankClient(token string) *MonobankClient {
+	getBankCurrencyRateLimiter := rate.Every(5 * time.Minute / 1)
+	getClientInfoRateLimiter := rate.Every(1 * time.Minute / 1)
+	getPersonalStatementsRateLimiter := rate.Every(1 * time.Minute / 1)
 	return &MonobankClient{
-		Token: token,
+		Token:                        token,
+		getBankCurrencyLimiter:       rate.NewLimiter(getBankCurrencyRateLimiter, 1),
+		getClientInfoLimiter:         rate.NewLimiter(getClientInfoRateLimiter, 1),
+		getPersonalStatementsLimiter: rate.NewLimiter(getPersonalStatementsRateLimiter, 1),
 	}
 }
 
@@ -50,6 +63,9 @@ func makeRequest(req *http.Request) ([]byte, error) {
 
 // GetBankCurrency returns all available currency infos.
 func (mc *MonobankClient) GetBankCurrency() (*CurrencyInfos, error) {
+	if !mc.getBankCurrencyLimiter.Allow() {
+		return nil, fmt.Errorf("too many requests")
+	}
 	url := fmt.Sprintf("%s/bank/currency", baseMonobankAPIUrl)
 	req, _ := http.NewRequest("GET", url, nil)
 	resp, err := makeRequest(req)
@@ -67,6 +83,9 @@ func (mc *MonobankClient) GetBankCurrency() (*CurrencyInfos, error) {
 
 // GetClientInfo returns all available info about the client.
 func (mc *MonobankClient) GetClientInfo() (*UserInfo, error) {
+	if !mc.getClientInfoLimiter.Allow() {
+		return nil, fmt.Errorf("too many requests")
+	}
 	url := fmt.Sprintf("%s/personal/client-info", baseMonobankAPIUrl)
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("X-Token", mc.Token)
@@ -109,6 +128,9 @@ func (mc *MonobankClient) GetPersonalStatementsTillNow(account string, from int6
 
 // GetPersonalStatements returns all transaction by the given account in the particular period of time.
 func (mc *MonobankClient) GetPersonalStatements(account string, from, to int64) (*StatementItems, error) {
+	if !mc.getPersonalStatementsLimiter.Allow() {
+		return nil, fmt.Errorf("too many requests")
+	}
 	if to-from > personalStatementTimeRange {
 		return nil, fmt.Errorf("Personal Statement can be obtained only in range of %d seconds", personalStatementTimeRange)
 	}
