@@ -17,6 +17,12 @@ all that yourself.
 
 Please take a look at `examples/example.go`.
 
+Run it using:
+```bash
+cd examples/
+go run example.go -token <your-token>
+```
+
 ### Links
 
 - [Token](https://api.monobank.ua/)

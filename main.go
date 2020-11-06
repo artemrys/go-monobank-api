@@ -15,6 +15,12 @@ const (
 	baseMonobankAPIUrl = "https://api.monobank.ua"
 )
 
+// MonobankClient holds data about monobank client.
+type MonobankClient struct {
+	// Token is monobank access token.
+	Token string
+}
+
 func makeRequest(req *http.Request) ([]byte, error) {
 	client := new(http.Client)
 	resp, err := client.Do(req)
@@ -28,16 +34,14 @@ func makeRequest(req *http.Request) ([]byte, error) {
 		glog.Errorf("Cannot read response body: %v", err)
 		return nil, err
 	}
-	monobankErr := new(Error)
-	err = json.Unmarshal(result, monobankErr)
-	if err == nil {
-		return nil, fmt.Errorf("while requesting Monobank: %q", monobankErr.ErrorDescription)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Monobank returned status code %d", resp.StatusCode)
 	}
 	return result, nil
 }
 
 // GetBankCurrency returns all available currency infos.
-func GetBankCurrency() (*CurrencyInfos, error) {
+func (mc *MonobankClient) GetBankCurrency() (*CurrencyInfos, error) {
 	url := fmt.Sprintf("%s/bank/currency", baseMonobankAPIUrl)
 	req, _ := http.NewRequest("GET", url, nil)
 	resp, err := makeRequest(req)
@@ -54,17 +58,17 @@ func GetBankCurrency() (*CurrencyInfos, error) {
 }
 
 // GetClientInfo returns all available info about the client.
-func GetClientInfo(token string) (*UserInfo, error) {
+func (mc *MonobankClient) GetClientInfo() (*UserInfo, error) {
 	url := fmt.Sprintf("%s/personal/client-info", baseMonobankAPIUrl)
 	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("X-Token", token)
+	req.Header.Set("X-Token", mc.Token)
 	resp, err := makeRequest(req)
+	print(err)
 	if err != nil {
 		return nil, err
 	}
 	result := new(UserInfo)
-	err = json.Unmarshal(resp, result)
-	if err != nil {
+	if err := json.Unmarshal(resp, result); err != nil {
 		glog.Errorf("Unable to unmarshal %v: %v", resp, err)
 		return nil, err
 	}
@@ -73,16 +77,16 @@ func GetClientInfo(token string) (*UserInfo, error) {
 
 // GetPersonalStatementsTillNow returns all transaction by the given account in the particular period of time.
 // It uses GetPersonalStatements but defines `to` param as now time.
-func GetPersonalStatementsTillNow(token, account, from string) (*StatementItems, error) {
+func (mc *MonobankClient) GetPersonalStatementsTillNow(account, from string) (*StatementItems, error) {
 	to := time.Now().Unix()
-	return GetPersonalStatements(token, account, from, strconv.FormatInt(to, 10))
+	return mc.GetPersonalStatements(account, from, strconv.FormatInt(to, 10))
 }
 
 // GetPersonalStatements returns all transaction by the given account in the particular period of time.
-func GetPersonalStatements(token, account, from, to string) (*StatementItems, error) {
+func (mc *MonobankClient) GetPersonalStatements(account, from, to string) (*StatementItems, error) {
 	url := fmt.Sprintf("%s/personal/statement/%s/%s/%s", baseMonobankAPIUrl, account, from, to)
 	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("X-Token", token)
+	req.Header.Set("X-Token", mc.Token)
 	resp, err := makeRequest(req)
 	if err != nil {
 		return nil, err
