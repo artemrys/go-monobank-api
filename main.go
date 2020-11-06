@@ -1,6 +1,7 @@
 package gomono
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -70,7 +71,6 @@ func (mc *MonobankClient) GetClientInfo() (*UserInfo, error) {
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("X-Token", mc.Token)
 	resp, err := makeRequest(req)
-	print(err)
 	if err != nil {
 		return nil, err
 	}
@@ -80,6 +80,24 @@ func (mc *MonobankClient) GetClientInfo() (*UserInfo, error) {
 		return nil, err
 	}
 	return result, nil
+}
+
+// SetWebhook sets webhook for monobank to send events.
+func (mc *MonobankClient) SetWebhook(webhookURL string) error {
+	url := fmt.Sprintf("%s/personal/webhook", baseMonobankAPIUrl)
+	requestBody, err := json.Marshal(map[string]string{
+		"webHookUrl": webhookURL,
+	})
+	if err != nil {
+		glog.Errorf("Unable to marshal setWebhook request: %v", err)
+		return err
+	}
+	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(requestBody))
+	req.Header.Set("X-Token", mc.Token)
+	if _, err := makeRequest(req); err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetPersonalStatementsTillNow returns all transaction by the given account in the particular period of time.
