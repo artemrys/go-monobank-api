@@ -32,7 +32,7 @@ func main() {
 		fmt.Printf("clientInfo: %+v\n", clientInfo)
 	}
 
-	personalStatements, err := mc.GetPersonalStatements("0", "1588982400", "1589070805")
+	personalStatements, err := mc.GetPersonalStatements("0", 1588982400, 1589070805)
 	if err != nil {
 		fmt.Printf("Error in getting personal statements: %v\n", err)
 	} else {

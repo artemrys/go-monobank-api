@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/golang/glog"
 )
 
 const (
-	baseMonobankAPIUrl = "https://api.monobank.ua"
+	baseMonobankAPIUrl         = "https://api.monobank.ua"
+	personalStatementTimeRange = 2682000 // in seconds
 )
 
 // MonobankClient holds data about monobank client.
@@ -102,14 +102,17 @@ func (mc *MonobankClient) SetWebhook(webhookURL string) error {
 
 // GetPersonalStatementsTillNow returns all transaction by the given account in the particular period of time.
 // It uses GetPersonalStatements but defines `to` param as now time.
-func (mc *MonobankClient) GetPersonalStatementsTillNow(account, from string) (*StatementItems, error) {
+func (mc *MonobankClient) GetPersonalStatementsTillNow(account string, from int64) (*StatementItems, error) {
 	to := time.Now().Unix()
-	return mc.GetPersonalStatements(account, from, strconv.FormatInt(to, 10))
+	return mc.GetPersonalStatements(account, from, to)
 }
 
 // GetPersonalStatements returns all transaction by the given account in the particular period of time.
-func (mc *MonobankClient) GetPersonalStatements(account, from, to string) (*StatementItems, error) {
-	url := fmt.Sprintf("%s/personal/statement/%s/%s/%s", baseMonobankAPIUrl, account, from, to)
+func (mc *MonobankClient) GetPersonalStatements(account string, from, to int64) (*StatementItems, error) {
+	if to-from > personalStatementTimeRange {
+		return nil, fmt.Errorf("Personal Statement can be obtained only in range of %d seconds", personalStatementTimeRange)
+	}
+	url := fmt.Sprintf("%s/personal/statement/%s/%d/%d", baseMonobankAPIUrl, account, from, to)
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("X-Token", mc.Token)
 	resp, err := makeRequest(req)
@@ -117,8 +120,7 @@ func (mc *MonobankClient) GetPersonalStatements(account, from, to string) (*Stat
 		return nil, err
 	}
 	result := new(StatementItems)
-	err = json.Unmarshal(resp, result)
-	if err != nil {
+	if err := json.Unmarshal(resp, result); err != nil {
 		glog.Errorf("Unable to unmarshal %v: %v", resp, err)
 		return nil, err
 	}
