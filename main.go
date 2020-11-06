@@ -21,6 +21,13 @@ type MonobankClient struct {
 	Token string
 }
 
+// NewMonobankClient returns new MonobankClient.
+func NewMonobankClient(token string) *MonobankClient {
+	return &MonobankClient{
+		Token: token,
+	}
+}
+
 func makeRequest(req *http.Request) ([]byte, error) {
 	client := new(http.Client)
 	resp, err := client.Do(req)

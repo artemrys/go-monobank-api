@@ -16,7 +16,7 @@ func main() {
 		return
 	}
 
-	mc := gomono.MonobankClient{Token: *token}
+	mc := gomono.NewMonobankClient(*token)
 
 	bankCurrency, err := mc.GetBankCurrency()
 	if err != nil {
